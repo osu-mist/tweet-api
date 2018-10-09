@@ -207,19 +207,20 @@ definitions:
 
 
   Error:
-      type: object
-      properties:
-        status:
-          type: string
-        code:
-          type: integer
-
-
-
-
-
-
-
-
-
- 
+    properties:
+      status:
+        type: string
+        description: HTTP status code
+      links:
+        properties:
+          about:
+            type: string
+      code:
+        type: string
+        description: error code
+      title:
+        type: string
+        description: error summary
+      detail:
+        type: string
+        description: details of the summary
