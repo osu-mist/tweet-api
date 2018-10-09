@@ -1,34 +1,34 @@
 swagger: "2.0"
-
 info:
   title: "Tweet API"
   description: "This provides an API for creating a message (post), reading a message (get), editing a message (put), delete a message (delete)."
   version: "1.0"
-
+  license:
+    name: GNU Affero General Public License Version 3
+    url: http://www.gnu.org/licenses/agpl-3.0.en.html
+externalDocs:
+  description: GitHub Repository
+  url: https://github.com/osu-mist/tweet-api
 host: localhost
-
-tags:
-- name: "tweets"
-
 schemes:
   - "https"
-
+basePath: /api/v1
 consumes:
   - application/json
 produces:
   - application/json
 
+tags:
+- name: "tweets"
+
 paths:
 
   /tweets:
-  
+
     get:
       tags:
       - tweets
       description: "search for a user's tweets"
-      produces:
-      - application/json
-
       parameters:
       - in: "query"
         name: userName
@@ -36,9 +36,34 @@ paths:
         type: string
 
       - in: "query"
-        name: tweetId
+        name: id
         required: false
-        type: integer
+        type: string
+
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/userTweets"
+        400:
+          description: The specified user ID is invalid
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: Unexpected Internal error
+          schema:
+            $ref: "#/definitions/Error"
+
+  /tweets/{id}:
+    get:
+      tags:
+        - tweets
+      description: "Find a tweet by tweet ID"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
 
       responses:
         200:
@@ -46,19 +71,15 @@ paths:
           schema:
             $ref: "#/definitions/tweetsData"
         400:
-          description: The specified user ID is invalid
+          description: Invalid request
           schema:
             $ref: "#/definitions/Error"
         404:
-          description: page not found
+          description: tweet does not exist
           schema:
             $ref: "#/definitions/Error"
-        405:
-          description: Invalid input
-          schema:
-            $ref: "#/definitions/Error"
-        default:
-          description: Unexpected error
+        500:
+          description: Unexpected server error
           schema:
             $ref: "#/definitions/Error"
 
@@ -66,9 +87,6 @@ paths:
       tags:
       - tweets
       description: "post a new tweet"
-      produces:
-      - application/json
-
       parameters:
         - name: body
           in: body
@@ -76,70 +94,23 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/tweetsData"
-
-      responses:
-        200:
-          description: Successful response
-          schema:
-            $ref: "#/definitions/tweetsData"
-        204:
-          description: No content
-          schema:
-            $ref: "#/definitions/Error"
-        400:
-          description: Bad request
-          schema:
-            $ref: "#/definitions/Error"
-        404:
-          description: page not found
-          schema:
-            $ref: "#/definitions/Error"
-        405:
-          description: Invalid input
-          schema:
-            $ref: "#/definitions/Error"
-        default:
-          description: Unexpected error
-          schema:
-            $ref: "#/definitions/Error"
-
-  /tweets/{tweetId}:
-
-    get:
-      tags:
-        - tweets
-      description: "Find a tweet by tweet ID"
-      produces:
-      - application/json
-      parameters:
-        - name: tweetId
+        - name: id
           in: path
           required: true
-          type: integer
+          type: string
+
 
       responses:
-        200:
-          description: Successful response
+        201:
+          description: Successfully posted
           schema:
             $ref: "#/definitions/tweetsData"
-        204:
-          description: No content
-          schema:
-            $ref: "#/definitions/Error"
         400:
-          description: Bad request
+          description: Invalid syntax in request
           schema:
             $ref: "#/definitions/Error"
-        404:
-          description: page not found
-          schema:
-            $ref: "#/definitions/Error"
-        405:
-          description: Invalid input
-          schema:
-            $ref: "#/definitions/Error"
-        default:
-          description: Unexpected error
+        500:
+          description: Internal server error
           schema:
             $ref: "#/definitions/Error"
 
@@ -147,15 +118,12 @@ paths:
       tags:
       - tweets
       description: "update a tweet"
-      produces:
-      - application/json
-
       parameters:
-        - name: tweetId
+        - name: id
           in: path
           description: "update the tweet"
           required: true
-          type: integer
+          type: string
 
         - name: body
           in: body
@@ -169,24 +137,16 @@ paths:
           description: Successful response
           schema:
             $ref: "#/definitions/tweetsData"
-        204:
-          description: No content
-          schema:
-            $ref: "#/definitions/Error"
         400:
-          description: Bad request
+          description: Invalid request
           schema:
             $ref: "#/definitions/Error"
         404:
           description: page not found
           schema:
             $ref: "#/definitions/Error"
-        405:
-          description: Invalid input
-          schema:
-            $ref: "#/definitions/Error"
-        default:
-          description: Unexpected error
+        500:
+          description: Internal server error
           schema:
             $ref: "#/definitions/Error"
 
@@ -194,56 +154,72 @@ paths:
       tags:
         - tweets
       description: "Delete a tweet"
-      produces:
-      - application/json
-
       parameters:
-        - name: tweetId
+        - name: id
           in: path
           description: "delete the tweet"
           required: true
-          type: integer
+          type: string
 
       responses:
-        200:
-          description: Successful response
+        204:
+          description: Successfully removed
           schema:
             $ref: "#/definitions/tweetsData"
-        204:
-          description: No content
-          schema:
-            $ref: "#/definitions/Error"
-        400:
-          description: Bad request
-          schema:
-            $ref: "#/definitions/Error"
         404:
-          description: page not found
+          description: tweet does not exist
           schema:
             $ref: "#/definitions/Error"
-        405:
-          description: Invalid input
-          schema:
-            $ref: "#/definitions/Error"
-        default:
-          description: Unexpected error
+        500:
+          description: Internal server error
           schema:
             $ref: "#/definitions/Error"
 
 
 definitions:
+
   tweetsData:
+    type: object
     properties:
+      id:
+        type: string
       userName:
         type: string
-      tweetId:
-        type: integer
       tweet:
         type: string
 
+  userTweets:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            userName:
+              type: string
+            tweet:
+              type: string
+            attributes:
+              $ref: "#/definitions/tweetsData"
+
+
   Error:
+      type: object
       properties:
-        error message:
-          type: "string"
-        error code:
-          type: "integer"
+        status:
+          type: string
+        code:
+          type: integer
+
+
+
+
+
+
+
+
+
+ 
