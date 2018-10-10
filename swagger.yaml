@@ -43,7 +43,7 @@ paths:
         200:
           description: Successful response
           schema:
-            $ref: "#/definitions/userTweets"
+            $ref: "#/definitions/UserTweets"
         400:
           description: The specified user ID is invalid
           schema:
@@ -65,7 +65,7 @@ paths:
         200:
           description: Successful response
           schema:
-            $ref: "#/definitions/tweetsData"
+            $ref: "#/definitions/TweetsData"
         400:
           description: Invalid request
           schema:
@@ -90,13 +90,13 @@ paths:
           description: "tweet will be created and posted"
           required: true
           schema:
-            $ref: "#/definitions/tweetsData"
+            $ref: "#/definitions/TweetsData"
 
       responses:
         201:
           description: Successfully posted
           schema:
-            $ref: "#/definitions/tweetsData"
+            $ref: "#/definitions/TweetsData"
         400:
           description: Invalid syntax in request
           schema:
@@ -117,19 +117,19 @@ paths:
           description: "tweet content to be updated"
           required: true
           schema:
-            $ref: "#/definitions/tweetsData"
+            $ref: "#/definitions/TweetsData"
 
       responses:
         200:
-          description: Successful response
+          description: Tweet successfully updated
           schema:
-            $ref: "#/definitions/tweetsData"
+            $ref: "#/definitions/TweetsData"
         400:
           description: Invalid request
           schema:
             $ref: "#/definitions/Errors"
         404:
-          description: page not found
+          description: Tweeet not found
           schema:
             $ref: "#/definitions/Errors"
         500:
@@ -146,11 +146,9 @@ paths:
 
       responses:
         204:
-          description: Successfully removed
-          schema:
-            $ref: "#/definitions/tweetsData"
+          description: Tweet successfully removed
         404:
-          description: tweet does not exist
+          description: Tweet does not exist
           schema:
             $ref: "#/definitions/Errors"
         500:
@@ -163,19 +161,20 @@ parameters:
     name: id
     in: path
     required: true
-    description: "a unique number for each tweet"
+    description: "a unique string for each tweet"
     type: string
 
 definitions:
-  tweetsData:
+  TweetsData:
     type: object
     properties:
       userName:
         type: string
+        example: "alawammo"
       tweet:
         type: string
 
-  userTweets:
+  UserTweets:
     properties:
       data:
         type: array
@@ -184,10 +183,11 @@ definitions:
           properties:
             id:
               type: string
+              example: 1234
             type:
               type: string
             attributes:
-              $ref: "#/definitions/tweetsData"
+              $ref: "#/definitions/TweetsData"
 
   Error:
     properties:
