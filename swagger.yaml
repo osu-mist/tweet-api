@@ -181,8 +181,6 @@ definitions:
   tweetsData:
     type: object
     properties:
-      id:
-        type: string
       userName:
         type: string
       tweet:
@@ -198,9 +196,7 @@ definitions:
           properties:
             id:
               type: string
-            userName:
-              type: string
-            tweet:
+            type:
               type: string
             attributes:
               $ref: "#/definitions/tweetsData"
@@ -224,3 +220,13 @@ definitions:
       detail:
         type: string
         description: details of the summary
+
+
+
+
+
+
+
+
+
+ 
