@@ -24,7 +24,6 @@ tags:
 paths:
 
   /tweets:
-
     get:
       tags:
       - tweets
@@ -85,14 +84,13 @@ paths:
       - tweets
       description: "post a new tweet"
       parameters:
+        - $ref: "#/parameters/id"
         - name: body
           in: body
           description: "tweet will be created and posted"
           required: true
           schema:
             $ref: "#/definitions/tweetsData"
-        - $ref: "#/parameters/id"
-
 
       responses:
         201:
@@ -114,7 +112,6 @@ paths:
       description: "update a tweet"
       parameters:
         - $ref: "#/parameters/id"
-
         - name: body
           in: body
           description: "tweet content to be updated"
@@ -168,13 +165,6 @@ parameters:
     required: true
     description: "a unique number for each tweet"
     type: string
-  body:
-    name: body
-    in: body
-    required: true
-    description: "content of the tweet"
-
-
 
 definitions:
   tweetsData:
