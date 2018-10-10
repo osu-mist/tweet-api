@@ -35,8 +35,8 @@ paths:
         required: false
         type: string
 
-      - in: "query"
-        name: id
+      - name: id
+        in: "query"
         required: false
         type: string
 
@@ -48,11 +48,11 @@ paths:
         400:
           description: The specified user ID is invalid
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
         500:
           description: Unexpected Internal error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
 
   /tweets/{id}:
     get:
@@ -60,10 +60,7 @@ paths:
         - tweets
       description: "Find a tweet by tweet ID"
       parameters:
-        - name: id
-          in: path
-          required: true
-          type: string
+        - $ref: "#/parameters/id"
 
       responses:
         200:
@@ -73,15 +70,15 @@ paths:
         400:
           description: Invalid request
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
         404:
           description: tweet does not exist
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
         500:
           description: Unexpected server error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
 
     post:
       tags:
@@ -94,10 +91,7 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/tweetsData"
-        - name: id
-          in: path
-          required: true
-          type: string
+        - $ref: "#/parameters/id"
 
 
       responses:
@@ -108,22 +102,18 @@ paths:
         400:
           description: Invalid syntax in request
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
         500:
           description: Internal server error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
 
     put:
       tags:
       - tweets
       description: "update a tweet"
       parameters:
-        - name: id
-          in: path
-          description: "update the tweet"
-          required: true
-          type: string
+        - $ref: "#/parameters/id"
 
         - name: body
           in: body
@@ -140,26 +130,22 @@ paths:
         400:
           description: Invalid request
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
         404:
           description: page not found
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
         500:
           description: Internal server error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
 
     delete:
       tags:
         - tweets
       description: "Delete a tweet"
       parameters:
-        - name: id
-          in: path
-          description: "delete the tweet"
-          required: true
-          type: string
+        - $ref: "#/parameters/id"
 
       responses:
         204:
@@ -169,15 +155,28 @@ paths:
         404:
           description: tweet does not exist
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
         500:
           description: Internal server error
           schema:
-            $ref: "#/definitions/Error"
+            $ref: "#/definitions/Errors"
+
+parameters:
+  id:
+    name: id
+    in: path
+    required: true
+    description: "a unique number for each tweet"
+    type: string
+  body:
+    name: body
+    in: body
+    required: true
+    description: "content of the tweet"
+
 
 
 definitions:
-
   tweetsData:
     type: object
     properties:
@@ -201,7 +200,6 @@ definitions:
             attributes:
               $ref: "#/definitions/tweetsData"
 
-
   Error:
     properties:
       status:
@@ -221,12 +219,9 @@ definitions:
         type: string
         description: details of the summary
 
-
-
-
-
-
-
-
-
- 
+  Errors:
+    properties:
+      errors:
+        type: array
+        items:
+           $ref: "#/definitions/Error"
