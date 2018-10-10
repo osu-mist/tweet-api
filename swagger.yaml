@@ -176,7 +176,6 @@ definitions:
         type: string
 
   userTweets:
-    type: object
     properties:
       data:
         type: array
