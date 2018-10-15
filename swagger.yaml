@@ -30,7 +30,7 @@ paths:
       description: "search for a user's tweets"
       parameters:
       - in: "query"
-        name: username
+        name: userName
         required: false
         type: string
 
@@ -168,7 +168,7 @@ definitions:
   TweetsData:
     type: object
     properties:
-      username:
+      userName:
         type: string
         example: "alawammo"
         description: a unique username for each user
@@ -200,7 +200,7 @@ definitions:
             type: string
           attributes:
             $ref: "#/definitions/TweetsData"
-
+      
   UserTweets:
     properties:
       data:
