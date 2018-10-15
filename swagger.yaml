@@ -30,7 +30,7 @@ paths:
       description: "search for a user's tweets"
       parameters:
       - in: "query"
-        name: userName
+        name: username
         required: false
         type: string
 
@@ -168,9 +168,18 @@ definitions:
   TweetsData:
     type: object
     properties:
-      userName:
+      username:
         type: string
         example: "alawammo"
+      userFullName:
+        type: string
+        example: "Mohammed Alawami"
+      time:
+        type: string
+        example: "1:35pm"
+      tweetDate:
+        type: integer
+        example:  "10/15/2018"
       tweet:
         type: string
 
@@ -187,7 +196,7 @@ definitions:
             type: string
           attributes:
             $ref: "#/definitions/TweetsData"
-      
+
   UserTweets:
     properties:
       data:
