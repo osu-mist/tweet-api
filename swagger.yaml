@@ -1,0 +1,230 @@
+swagger: "2.0"
+info:
+  title: "Tweet API"
+  description: "This provides an API for creating a message (post), reading a message (get), editing a message (put), delete a message (delete)."
+  version: "1.0"
+  license:
+    name: GNU Affero General Public License Version 3
+    url: http://www.gnu.org/licenses/agpl-3.0.en.html
+externalDocs:
+  description: GitHub Repository
+  url: https://github.com/osu-mist/tweet-api
+host: localhost
+schemes:
+  - "https"
+basePath: /api/v1
+consumes:
+  - application/json
+produces:
+  - application/json
+
+tags:
+- name: "tweets"
+
+paths:
+
+  /tweets:
+    get:
+      tags:
+      - tweets
+      description: "search for a user's tweets"
+      parameters:
+      - in: "query"
+        name: userName
+        required: false
+        type: string
+
+      - name: id
+        in: "query"
+        required: false
+        type: string
+
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/UserTweets"
+        400:
+          description: The specified user ID is invalid
+          schema:
+            $ref: "#/definitions/Errors"
+        500:
+          description: Unexpected Internal error
+          schema:
+            $ref: "#/definitions/Errors"
+
+  /tweets/{id}:
+    get:
+      tags:
+        - tweets
+      description: "Find a tweet by tweet ID"
+      parameters:
+        - $ref: "#/parameters/id"
+
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: "#/definitions/UserTweetdata"
+        400:
+          description: Invalid request
+          schema:
+            $ref: "#/definitions/Errors"
+        404:
+          description: tweet does not exist
+          schema:
+            $ref: "#/definitions/Errors"
+        500:
+          description: Unexpected server error
+          schema:
+            $ref: "#/definitions/Errors"
+
+    post:
+      tags:
+      - tweets
+      description: "post a new tweet"
+      parameters:
+        - $ref: "#/parameters/id"
+        - name: body
+          in: body
+          description: "tweet will be created and posted"
+          required: true
+          schema:
+            $ref: "#/definitions/TweetsData"
+
+      responses:
+        201:
+          description: Successfully posted
+          schema:
+            $ref: "#/definitions/TweetsData"
+        400:
+          description: Invalid syntax in request
+          schema:
+            $ref: "#/definitions/Errors"
+        500:
+          description: Internal server error
+          schema:
+            $ref: "#/definitions/Errors"
+
+    put:
+      tags:
+      - tweets
+      description: "update a tweet"
+      parameters:
+        - $ref: "#/parameters/id"
+        - name: body
+          in: body
+          description: "tweet content to be updated"
+          required: true
+          schema:
+            $ref: "#/definitions/TweetsData"
+
+      responses:
+        200:
+          description: Tweet successfully updated
+          schema:
+            $ref: "#/definitions/TweetsData"
+        400:
+          description: Invalid request
+          schema:
+            $ref: "#/definitions/Errors"
+        404:
+          description: Tweeet not found
+          schema:
+            $ref: "#/definitions/Errors"
+        500:
+          description: Internal server error
+          schema:
+            $ref: "#/definitions/Errors"
+
+    delete:
+      tags:
+        - tweets
+      description: "Delete a tweet"
+      parameters:
+        - $ref: "#/parameters/id"
+
+      responses:
+        204:
+          description: Tweet successfully removed
+        404:
+          description: Tweet does not exist
+          schema:
+            $ref: "#/definitions/Errors"
+        500:
+          description: Internal server error
+          schema:
+            $ref: "#/definitions/Errors"
+
+parameters:
+  id:
+    name: id
+    in: path
+    required: true
+    description: "a unique string for each tweet"
+    type: string
+
+definitions:
+  TweetsData:
+    type: object
+    properties:
+      userName:
+        type: string
+        example: "alawammo"
+      tweet:
+        type: string
+
+  UserTweetdata:
+    type: object
+    properties:
+      data:
+        type: object
+        properties:
+          id:
+            type: string
+            example: 1234
+          type:
+            type: string
+          attributes:
+            $ref: "#/definitions/TweetsData"
+      
+  UserTweets:
+    properties:
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              example: 1234
+            type:
+              type: string
+            attributes:
+              $ref: "#/definitions/TweetsData"
+
+  Error:
+    properties:
+      status:
+        type: string
+        description: HTTP status code
+      links:
+        properties:
+          about:
+            type: string
+      code:
+        type: string
+        description: error code
+      title:
+        type: string
+        description: error summary
+      detail:
+        type: string
+        description: details of the summary
+
+  Errors:
+    properties:
+      errors:
+        type: array
+        items:
+           $ref: "#/definitions/Error"
