@@ -236,7 +236,7 @@ definitions:
             type: string
           attributes:
             $ref: "#/definitions/TweetsPData"
-
+      
   UserTweets:
     properties:
       data:
