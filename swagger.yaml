@@ -171,15 +171,19 @@ definitions:
       username:
         type: string
         example: "alawammo"
+        description: a unique username for each user
       userFullName:
         type: string
         example: "Mohammed Alawami"
+        description: the user's first and last name
       time:
         type: string
-        example: "1:35pm"
+        example: "13:36"
+        description: the time that the tweet was posted or modified at
       tweetDate:
-        type: integer
-        example:  "10/15/2018"
+        type: string
+        example:  "2018-10-15"
+        description: the date that the tweet was posted on modified at
       tweet:
         type: string
 
