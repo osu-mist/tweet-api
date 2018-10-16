@@ -90,13 +90,13 @@ paths:
           description: "tweet will be created and posted"
           required: true
           schema:
-            $ref: "#/definitions/UserPTweetdata"
+            $ref: "#/definitions/PutPushTweetdata"
 
       responses:
         201:
           description: "Successfully posted"
           schema:
-            $ref: "#/definitions/UserPTweetdata"
+            $ref: "#/definitions/PutPushTweetdata"
         400:
           description: "Invalid syntax in request"
           schema:
@@ -117,13 +117,13 @@ paths:
           description: "tweet content to be updated"
           required: true
           schema:
-            $ref: "#/definitions/UserPTweetdata"
+            $ref: "#/definitions/PutPushTweetdata"
 
       responses:
         200:
           description: "Tweet successfully updated"
           schema:
-            $ref: "#/definitions/UserPTweetdata"
+            $ref: "#/definitions/PutPushTweetdata"
         400:
           description: "Invalid request"
           schema:
@@ -187,7 +187,7 @@ definitions:
       mood:
         type: string
         example: "happy"
-        description:  "The mood of the user when typeing the message"
+        description:  "The mood of the user when typing the message"
       tweet:
         type: string
 
@@ -223,20 +223,17 @@ definitions:
           attributes:
             $ref: "#/definitions/TweetsData"
 
-  UserPTweetdata:
+  PutPushTweetdata:
     type: object
     properties:
       data:
         type: object
         properties:
-          id:
-            type: string
-            example: 1234
           type:
             type: string
           attributes:
             $ref: "#/definitions/TweetsPData"
-      
+
   UserTweets:
     properties:
       data:
