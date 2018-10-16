@@ -41,15 +41,15 @@ paths:
 
       responses:
         200:
-          description: Successful response
+          description: "Successful response"
           schema:
             $ref: "#/definitions/UserTweets"
         400:
-          description: The specified user ID is invalid
+          description: "The specified user ID is invalid"
           schema:
             $ref: "#/definitions/Errors"
         500:
-          description: Unexpected Internal error
+          description: "Unexpected Internal error"
           schema:
             $ref: "#/definitions/Errors"
 
@@ -63,19 +63,19 @@ paths:
 
       responses:
         200:
-          description: Successful response
+          description: "Successful response"
           schema:
             $ref: "#/definitions/UserTweetdata"
         400:
-          description: Invalid request
+          description: "Invalid request"
           schema:
             $ref: "#/definitions/Errors"
         404:
-          description: tweet does not exist
+          description: "tweet does not exist"
           schema:
             $ref: "#/definitions/Errors"
         500:
-          description: Unexpected server error
+          description: "Unexpected server error"
           schema:
             $ref: "#/definitions/Errors"
 
@@ -90,19 +90,19 @@ paths:
           description: "tweet will be created and posted"
           required: true
           schema:
-            $ref: "#/definitions/TweetsData"
+            $ref: "#/definitions/TweetsPutPushData"
 
       responses:
         201:
-          description: Successfully posted
+          description: "Successfully posted"
           schema:
-            $ref: "#/definitions/TweetsData"
+            $ref: "#/definitions/AllPutPushTweet"
         400:
-          description: Invalid syntax in request
+          description: "Invalid syntax in request"
           schema:
             $ref: "#/definitions/Errors"
         500:
-          description: Internal server error
+          description: "Internal server error"
           schema:
             $ref: "#/definitions/Errors"
 
@@ -117,23 +117,23 @@ paths:
           description: "tweet content to be updated"
           required: true
           schema:
-            $ref: "#/definitions/TweetsData"
+            $ref: "#/definitions/TweetsPutPushData"
 
       responses:
         200:
-          description: Tweet successfully updated
+          description: "Tweet successfully updated"
           schema:
-            $ref: "#/definitions/TweetsData"
+            $ref: "#/definitions/AllPutPushTweet"
         400:
-          description: Invalid request
+          description: "Invalid request"
           schema:
             $ref: "#/definitions/Errors"
         404:
-          description: Tweeet not found
+          description: "Tweeet not found"
           schema:
             $ref: "#/definitions/Errors"
         500:
-          description: Internal server error
+          description: "Internal server error"
           schema:
             $ref: "#/definitions/Errors"
 
@@ -146,13 +146,13 @@ paths:
 
       responses:
         204:
-          description: Tweet successfully removed
+          description: "Tweet successfully removed"
         404:
-          description: Tweet does not exist
+          description: "Tweet does not exist"
           schema:
             $ref: "#/definitions/Errors"
         500:
-          description: Internal server error
+          description: "Internal server error"
           schema:
             $ref: "#/definitions/Errors"
 
@@ -171,6 +171,41 @@ definitions:
       userName:
         type: string
         example: "alawammo"
+        description: "a unique username for each user"
+      userFullName:
+        type: string
+        example: "Mohammed Alawami"
+        description: "the user's first and last name"
+      timeAndDate:
+        type: string
+        example: "2018-10-15T20:34:22+00:00"
+        description: "the time that the tweet was posted at"
+      numOfChar:
+        type: integer
+        example: 100
+        description: "number of char in a tweet"
+      mood:
+        type: string
+        example: "happy"
+        description:  "The mood of the user when typing the message"
+      tweet:
+        type: string
+
+  TweetsPutPushData:
+    type: object
+    properties:
+      userName:
+        type: string
+        example: "alawammo"
+        description: "a unique username for each user"
+      userFullName:
+        type: string
+        example: "Mohammed Alawami"
+        description: "the user's first and last name"
+      mood:
+        type: string
+        example: "happy"
+        description:  "The mood of the user when typeing the message"
       tweet:
         type: string
 
@@ -187,7 +222,21 @@ definitions:
             type: string
           attributes:
             $ref: "#/definitions/TweetsData"
-      
+
+  AllPutPushTweet:
+    type: object
+    properties:
+      data:
+        type: object
+        properties:
+          id:
+            type: string
+            example: 1234
+          type:
+            type: string
+          attributes:
+            $ref: "#/definitions/TweetsPutPushData"
+
   UserTweets:
     properties:
       data:
@@ -207,20 +256,20 @@ definitions:
     properties:
       status:
         type: string
-        description: HTTP status code
+        description: "HTTP status code"
       links:
         properties:
           about:
             type: string
       code:
         type: string
-        description: error code
+        description: "error code"
       title:
         type: string
-        description: error summary
+        description: "error summary"
       detail:
         type: string
-        description: details of the summary
+        description: "details of the summary"
 
   Errors:
     properties:
