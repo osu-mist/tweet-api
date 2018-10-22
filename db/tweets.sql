@@ -1,36 +1,42 @@
--- USERDATA table for holding the user information (username, user full name, and user id)
+-- USERDATA table for holding the user information (USERNAME, user full name, and user ID)
 CREATE TABLE USERDATA(
-    userid NUMBER NOT NULL,
-    username VARCHAR2(255 char) NOT NULL,
-    userfullname VARCHAR2(255 char),
-    PRIMARY KEY (userid)
+    USER_ID NUMBER NOT NULL,
+    USERNAME VARCHAR2(255 char) NOT NULL,
+    USERFULLNAME VARCHAR2(255 char),
+    PRIMARY KEY (USER_ID)
 );
--- sequence counter for the unique user id, starts from 1 and increment by 1
-CREATE SEQUENCE seq_userid
+
+COMMENT ON TABLE USERDATA IS 'Contains the data for the user, e.g (USER ID, USERNAME, USER FULL NAME)';
+COMMENT ON COLUMN USERDATA.USER_ID IS 'ID OF users';
+COMMENT ON COLUMN USERDATA.USERNAME IS 'Username name';
+COMMENT ON COLUMN USERDATA.USERFULLNAME IS 'User full name';
+
+-- sequence counter for the unique user ID, starts from 1 and increment by 1
+CREATE SEQUENCE seq_USER_ID
 MINVALUE 1
 START WITH 1
 INCREMENT BY 1
 CACHE 10;
 
---INSERT INTO USERDATA (userid)
---VALUES (seq_userid.nextval);
+--INSERT INTO USERDATA (USER_ID)
+--VALUES (seq_USER_ID.nextval);
 
--- TWEETDATA table holds the tweet information, (message, tweet id, title, mode)
-CREATE TABLE TWEETDATA(
-    userid NUMBER,
-    id NUMBER  NOT NULL,
-    tweetmsg VARCHAR2(255 char),
-    title VARCHAR2(255 char),
-    mood VARCHAR2(255 char),
-    FOREIGN KEY (userid) REFERENCES USERDATA(userid),
-    PRIMARY KEY (id)
+-- TWEET_DATA table holds the tweet information, (message, tweet ID, TITLE, mode)
+CREATE TABLE TWEET_DATA(
+    USER_ID NUMBER NOT NULL,
+    ID  VARCHAR2(255 char)  NOT NULL,
+    TWEET_MSG VARCHAR2(255 char),
+    TITLE VARCHAR2(255 char),
+    MOOD VARCHAR2(255 char),
+    TIME_AND_DATE VARCHAR2(255 char),
+    FOREIGN KEY (USER_ID) REFERENCES USERDATA(USER_ID),
+    PRIMARY KEY (ID)
 );
--- sequence counter for the unique user tweet id, starts from 1 and increment by 1
-CREATE SEQUENCE seq_tweet
-MINVALUE 1
-START WITH 1
-INCREMENT BY 1
-CACHE 10;
 
---INSERT INTO TWEETDATA (id)
---VALUES (seq_userid.nextval);
+COMMENT ON TABLE TWEET_DATA IS 'Contains inforamtion and content of the tweet';
+COMMENT ON COLUMN TWEET_DATA.USER_ID IS 'ID of the owner of the tweet';
+COMMENT ON COLUMN TWEET_DATA.ID IS 'ID of the tweet';
+COMMENT ON COLUMN TWEET_DATA.TWEET_MSG IS 'Content of tweet message';
+COMMENT ON COLUMN TWEET_DATA.TITLE IS 'Title of the tweet message';
+COMMENT ON COLUMN TWEET_DATA.MOOD IS 'The mood of the user while typeing the tweet message';
+COMMENT ON COLUMN TWEET_DATA.Time_AND_DATE IS 'The time and date of the tweet message';
