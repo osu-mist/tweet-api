@@ -1,0 +1,40 @@
+{
+  "UserData": [
+    {
+      "Username": "Alawammo",
+      "UserFullName": "Mohammed Alawami",
+      "UserID": "1"
+    },
+    {
+      "Username": "IanW",
+      "UserFullName": "Ian Wilson",
+      "UserID": "2"
+    }
+  ],
+  "TweetData": [
+    {
+      "UserID": "1",
+      "TweetID": "1",
+      "TweetMsg": "Hello World",
+      "Title": "Hello",
+      "Mood": "Happy",
+      "TimeAndDate": "23-OCT-18 01.18.44.281602 PM -07:00"
+    },
+    {
+      "UserID": "2",
+      "TweetID": "2",
+      "TweetMsg": "Hello World 2",
+      "Title": "Hello2",
+      "Mood": "Happy2",
+      "TimeAndDate": "23-OCT-18 01.18.44.286988 PM -07:00"
+    },
+    {
+      "UserID": "1",
+      "TweetID": "3",
+      "TweetMsg": "another tweet for alawammo",
+      "Title": "tweet 2",
+      "Mood": "okay",
+      "TimeAndDate": "23-OCT-18 03.18.44.286988 PM -08:00"
+    }
+  ]
+}
