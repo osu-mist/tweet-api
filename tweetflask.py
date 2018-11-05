@@ -64,5 +64,10 @@ def errors(status, detail):
     app.logger.info(error)
     return error
 
+@app.route('/tweets/<int:num>')
+def getbyid():
+    app.logger.info(("--------------"))
+    return "------------"
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
