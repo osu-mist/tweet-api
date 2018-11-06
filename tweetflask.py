@@ -8,47 +8,46 @@ app.config['JSON_SORT_KEYS'] = False
 
 @app.route('/tweets')
 def get():
-    jsondata = json.load(open('db.json'))
+    with open('db.json', 'r') as jfile:
+        jsondata = json.load(jfile)
     username = request.args.get('username')
-    id = request.args.get('id')
-    if username is None and id is None:
-        return jsonify(errors('400', 'No username or ID provided')), 400
+    mood = request.args.get('mood')
+    if username is None:
+        return jsonify(errors('400', 'No username provided')), 400
 
     for user in jsondata['UserData']:
-        if username is not None:
-            if username == user['Username']:
-                return jsonify(get_tweet(jsondata, user))
-        return jsonify(errors('400', 'The username is invalid')), 400
-        if id is not None:
-            if id == user['UserID']:
-                return jsonify(get_tweet(jsondata, user))
-        return jsonify(errors('400', 'The id is invalid')), 400
+        if username == user['Username']:
+            return jsonify(get_tweet(jsondata, user, mood))
+    return jsonify(get_tweet(jsondata, None, None))
 
 
-def get_tweet(jsondata, user):
+def get_tweet(jsondata, user, mood):
     tweetdata = {
         "data": [
         ]
     }
+    if user is None:
+        return tweetdata
     for tweets in jsondata['TweetData']:
         if user['UserID'] == tweets['UserID']:
-            response_data = {}
-            response_data['id'] = user['UserID']
-            response_data['type'] = "string"
-            response_data['attributes'] = {
-                "username": user['Username'],
-                "userFullName": user['UserFullName'],
-                "timeAndDate": tweets['TimeAndDate'],
-                "title": tweets['Title'],
-                "mood": tweets['Mood'],
-                "tweet": tweets['TweetMsg']
-            }
-            tweetdata["data"].append(response_data)
+            if mood is None or mood is not None and mood == tweets['Mood']:
+                response_data = {}
+                response_data['id'] = user['UserID']
+                response_data['type'] = "string"
+                response_data['attributes'] = {
+                    "username": user['Username'],
+                    "userFullName": user['UserFullName'],
+                    "timeAndDate": tweets['TimeAndDate'],
+                    "title": tweets['Title'],
+                    "mood": tweets['Mood'],
+                    "tweet": tweets['TweetMsg']
+                }
+                tweetdata["data"].append(response_data)
     return tweetdata
 
 
 def errors(status, detail):
-    aboutlink = "https://developer.oregonstate.edu/documentation/error-reference"
+    abouturl = "https://developer.oregonstate.edu/documentation/error-reference"
     if status is '400':
         title = "Username is invalid"
     error = {
@@ -58,7 +57,7 @@ def errors(status, detail):
     response_error = {}
     response_error['status'] = status
     response_error['links'] = {
-        "about": f'{aboutlink}#1{status}'
+        "about": f'{abouturl}#1{status}'
     }
     response_error['code'] = f'1{status}'
     response_error['title'] = title
