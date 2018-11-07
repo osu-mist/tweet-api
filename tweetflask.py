@@ -1,8 +1,7 @@
-from flask import Flask, jsonify, Response, request
-from flask_restful import Api, Resource
+from flask import Flask, jsonify, request
 import json
+import ssl
 app = Flask(__name__)
-api = Api(app)
 app.config['JSON_SORT_KEYS'] = False
 
 
@@ -47,7 +46,7 @@ def get_tweet(jsondata, user, mood):
 
 
 def errors(status, detail):
-    abouturl = "https://developer.oregonstate.edu/documentation/error-reference"
+    aboutur = "https://developer.oregonstate.edu/documentation/error-reference"
     if status is '400':
         title = "Username is invalid"
     error = {
@@ -57,7 +56,7 @@ def errors(status, detail):
     response_error = {}
     response_error['status'] = status
     response_error['links'] = {
-        "about": f'{abouturl}#1{status}'
+        "about": f'{aboutur}#1{status}'
     }
     response_error['code'] = f'1{status}'
     response_error['title'] = title
@@ -67,4 +66,6 @@ def errors(status, detail):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    context.load_cert_chain('/Users/Mohammed/Desktop/CA/server.crt', '/Users/Mohammed/Desktop/CA/key.pem')
+    app.run(debug=True, port=5000, ssl_context=context)

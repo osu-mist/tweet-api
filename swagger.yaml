@@ -30,11 +30,11 @@ paths:
       description: "search for a user's tweets"
       parameters:
       - in: "query"
-        name: userName
-        required: false
+        name: username
+        required: true
         type: string
 
-      - name: id
+      - name: mood
         in: "query"
         required: false
         type: string
@@ -50,32 +50,6 @@ paths:
             $ref: "#/definitions/Errors"
         500:
           description: "Unexpected Internal error"
-          schema:
-            $ref: "#/definitions/Errors"
-
-  /tweets/{id}:
-    get:
-      tags:
-        - tweets
-      description: "Find a tweet by tweet ID"
-      parameters:
-        - $ref: "#/parameters/id"
-
-      responses:
-        200:
-          description: "Successful response"
-          schema:
-            $ref: "#/definitions/UserTweetdata"
-        400:
-          description: "Invalid request"
-          schema:
-            $ref: "#/definitions/Errors"
-        404:
-          description: "tweet does not exist"
-          schema:
-            $ref: "#/definitions/Errors"
-        500:
-          description: "Unexpected server error"
           schema:
             $ref: "#/definitions/Errors"
 
@@ -103,6 +77,32 @@ paths:
             $ref: "#/definitions/Errors"
         500:
           description: "Internal server error"
+          schema:
+            $ref: "#/definitions/Errors"
+
+  /tweets/{id}:
+    get:
+      tags:
+        - tweets
+      description: "Find a tweet by tweet ID"
+      parameters:
+        - $ref: "#/parameters/id"
+
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: "#/definitions/UserTweetdata"
+        400:
+          description: "Invalid request"
+          schema:
+            $ref: "#/definitions/Errors"
+        404:
+          description: "tweet does not exist"
+          schema:
+            $ref: "#/definitions/Errors"
+        500:
+          description: "Unexpected server error"
           schema:
             $ref: "#/definitions/Errors"
 
@@ -168,7 +168,7 @@ definitions:
   TweetsData:
     type: object
     properties:
-      userName:
+      username:
         type: string
         example: "alawammo"
         description: "a unique username for each user"
@@ -194,7 +194,7 @@ definitions:
   TweetsPutPushData:
     type: object
     properties:
-      userName:
+      username:
         type: string
         example: "alawammo"
         description: "a unique username for each user"
