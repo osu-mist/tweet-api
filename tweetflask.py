@@ -1,25 +1,35 @@
 from flask import Flask, jsonify, request
+from flask_basicauth import BasicAuth
 import json
+import yaml
 import ssl
 app = Flask(__name__)
+basic_auth = BasicAuth(app)
 app.config['JSON_SORT_KEYS'] = False
+app.config['BASIC_AUTH_FORCE'] = True
 
 
 @app.route('/tweets')
 def get():
+    # Opening and reading the db file
     with open('db.json', 'r') as jfile:
         jsondata = json.load(jfile)
+    # Parsing the username and mood from url
     username = request.args.get('username')
     mood = request.args.get('mood')
+    # return 400 for not providing a username
     if username is None:
         return jsonify(errors('400', 'No username provided')), 400
-
+    # looking up the username in the DB
     for user in jsondata['UserData']:
         if username == user['Username']:
             return jsonify(get_tweet(jsondata, user, mood))
+    # if the username does not exist in DB this line will be excuted
+    # to return an empty array
     return jsonify(get_tweet(jsondata, None, None))
 
-
+# lookes up all the tweets that belong to the username provided
+# and looks for the mood if provided
 def get_tweet(jsondata, user, mood):
     tweetdata = {
         "data": [
@@ -66,6 +76,13 @@ def errors(status, detail):
 
 
 if __name__ == '__main__':
+    with open('config.yaml', 'r') as yfile:
+        yamldata = yaml.load(yfile)
     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-    context.load_cert_chain('/Users/Mohammed/Desktop/CA/server.crt', '/Users/Mohammed/Desktop/CA/key.pem')
-    app.run(debug=True, port=5000, ssl_context=context)
+    context.load_cert_chain(
+        yamldata['server']['certPath'],
+        yamldata['server']['keyPath']
+        )
+    app.config['BASIC_AUTH_USERNAME'] = yamldata['authentication']['username']
+    app.config['BASIC_AUTH_PASSWORD'] = yamldata['authentication']['password']
+    app.run(debug=True, port=yamldata['server']['port'], ssl_context=context)
