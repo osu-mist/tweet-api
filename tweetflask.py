@@ -28,6 +28,7 @@ def get():
     # to return an empty array
     return jsonify(get_tweet(jsondata, None, None))
 
+
 # lookes up all the tweets that belong to the username provided
 # and looks for the mood if provided
 def get_tweet(jsondata, user, mood):
