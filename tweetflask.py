@@ -6,17 +6,8 @@ import json
 import yaml
 import ssl
 
+
 app = Flask(__name__)
-app.config['JSON_SORT_KEYS'] = False
-app.config['BASIC_AUTH_FORCE'] = True
-
-
-class ChallengeAuth(BasicAuth):
-    def challenge(self):
-        return jsonify(errors('401', 'Wrong username or password')), 401
-
-
-basic_auth = ChallengeAuth(app)
 
 
 @app.route('/tweets')
@@ -97,6 +88,14 @@ def errors(status, detail):
 
 
 if __name__ == '__main__':
+    app.config['JSON_SORT_KEYS'] = False
+    app.config['BASIC_AUTH_FORCE'] = True
+
+    class ChallengeAuth(BasicAuth):
+        def challenge(self):
+            return jsonify(errors('401', 'Wrong username or password')), 401
+
+    basic_auth = ChallengeAuth(app)
     with open('config.yaml', 'r') as yfile:
         yamldata = yaml.load(yfile)
     secureProtocol = yamldata['server']['secureProtocol']
