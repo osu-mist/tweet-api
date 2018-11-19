@@ -1,12 +1,22 @@
 from flask import Flask, jsonify, request
 from flask_basicauth import BasicAuth
+from datetime import datetime
+
 import json
 import yaml
 import ssl
+
 app = Flask(__name__)
-basic_auth = BasicAuth(app)
 app.config['JSON_SORT_KEYS'] = False
 app.config['BASIC_AUTH_FORCE'] = True
+
+
+class ChallengeAuth(BasicAuth):
+    def challenge(self):
+        return jsonify(errors('401', 'Wrong username or password')), 401
+
+
+basic_auth = ChallengeAuth(app)
 
 
 @app.route('/tweets')
@@ -18,18 +28,18 @@ def get():
     username = request.args.get('username')
     mood = request.args.get('mood')
     # return 400 for not providing a username
-    if username is None:
+    if not username:
         return jsonify(errors('400', 'No username provided')), 400
     # looking up the username in the DB
     for user in jsondata['UserData']:
-        if username == user['Username']:
+        if username.upper().lower() == user['Username'].upper().lower():
             return jsonify(get_tweet(jsondata, user, mood))
     # if the username does not exist in DB this line will be excuted
     # to return an empty array
     return jsonify(get_tweet(jsondata, None, None))
 
 
-# lookes up all the tweets that belong to the username provided
+# looks up all the tweets that belong to the username provided
 # and looks for the mood if provided
 def get_tweet(jsondata, user, mood):
     tweetdata = {
@@ -40,14 +50,16 @@ def get_tweet(jsondata, user, mood):
         return tweetdata
     for tweets in jsondata['TweetData']:
         if user['UserID'] == tweets['UserID']:
-            if mood is None or mood is not None and mood == tweets['Mood']:
+            if not mood or mood.lower() == tweets['Mood'].lower():
                 response_data = {}
-                response_data['id'] = user['UserID']
-                response_data['type'] = "string"
+                response_data['id'] = tweets['TweetID']
+                response_data['type'] = "tweet"
+                time = datetime.strptime(tweets['TimeAndDate'],
+                                         '%d-%b-%y %I.%M.%S.%f %p %z')
                 response_data['attributes'] = {
                     "username": user['Username'],
                     "userFullName": user['UserFullName'],
-                    "timeAndDate": tweets['TimeAndDate'],
+                    "timeAndDate": time.isoformat(),
                     "title": tweets['Title'],
                     "mood": tweets['Mood'],
                     "tweet": tweets['TweetMsg']
@@ -57,9 +69,17 @@ def get_tweet(jsondata, user, mood):
 
 
 def errors(status, detail):
-    aboutur = "https://developer.oregonstate.edu/documentation/error-reference"
+    error_base_url = "https://developer.oregonstate.edu/documentation"
+    reference_error = "/error-reference"
+    code = f'1{status}'
     if status is '400':
-        title = "Username is invalid"
+        title = "Bad Reques"
+    if status is '401':
+        title = "Authentication faild"
+    elif status is '404':
+        title = "Page not found"
+    elif status is '500':
+        title = "Unexpected Internal error"
     error = {
         "errors": [
         ]
@@ -67,9 +87,9 @@ def errors(status, detail):
     response_error = {}
     response_error['status'] = status
     response_error['links'] = {
-        "about": f'{aboutur}#1{status}'
+        "about": f'{error_base_url}{reference_error}{code}'
     }
-    response_error['code'] = f'1{status}'
+    response_error['code'] = code
     response_error['title'] = title
     response_error['detail'] = detail
     error['errors'].append(response_error)
@@ -79,11 +99,17 @@ def errors(status, detail):
 if __name__ == '__main__':
     with open('config.yaml', 'r') as yfile:
         yamldata = yaml.load(yfile)
-    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    secureProtocol = yamldata['server']['secureProtocol']
+    try:
+        context = ssl.SSLContext(getattr(ssl, secureProtocol))
+    except AttributeError as e:
+        exit("Invalid secureProtocol")
+
     context.load_cert_chain(
         yamldata['server']['certPath'],
         yamldata['server']['keyPath']
         )
     app.config['BASIC_AUTH_USERNAME'] = yamldata['authentication']['username']
     app.config['BASIC_AUTH_PASSWORD'] = yamldata['authentication']['password']
+
     app.run(debug=True, port=yamldata['server']['port'], ssl_context=context)
