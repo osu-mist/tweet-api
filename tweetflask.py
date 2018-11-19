@@ -34,7 +34,7 @@ def get():
 # and looks for the mood if provided
 def get_tweet(jsondata, user, mood):
     tweetdata = {
-        "data": [
+        'data': [
         ]
     }
     if user is None:
@@ -48,12 +48,12 @@ def get_tweet(jsondata, user, mood):
                 time = datetime.strptime(tweets['TimeAndDate'],
                                          '%d-%b-%y %I.%M.%S.%f %p %z')
                 response_data['attributes'] = {
-                    "username": user['Username'],
-                    "userFullName": user['UserFullName'],
-                    "timeAndDate": time.isoformat(),
-                    "title": tweets['Title'],
-                    "mood": tweets['Mood'],
-                    "tweet": tweets['TweetMsg']
+                    'username': user['Username'],
+                    'userFullName': user['UserFullName'],
+                    'timeAndDate': time.isoformat(),
+                    'title': tweets['Title'],
+                    'mood': tweets['Mood'],
+                    'tweet': tweets['TweetMsg']
                 }
                 tweetdata["data"].append(response_data)
     return tweetdata
@@ -63,22 +63,21 @@ def errors(status, detail):
     error_base_url = "https://developer.oregonstate.edu/documentation"
     reference_error = "/error-reference"
     code = f'1{status}'
-    if status is '400':
-        title = "Bad Reques"
-    if status is '401':
-        title = "Authentication faild"
-    elif status is '404':
-        title = "Page not found"
-    elif status is '500':
-        title = "Unexpected Internal error"
+    errordictionary = {
+        '400': 'Bad Request',
+        '401': 'Authentication faild',
+        '404': 'Page not found',
+        '500': 'Unexpected Internal error'
+    }
+    title = errordictionary[status]
     error = {
-        "errors": [
+        'errors': [
         ]
     }
     response_error = {}
     response_error['status'] = status
     response_error['links'] = {
-        "about": f'{error_base_url}{reference_error}{code}'
+        'about': f'{error_base_url}{reference_error}{code}'
     }
     response_error['code'] = code
     response_error['title'] = title
@@ -87,13 +86,14 @@ def errors(status, detail):
     return error
 
 
+class ChallengeAuth(BasicAuth):
+    def challenge(self):
+        return jsonify(errors('401', 'Wrong username or password')), 401
+
+
 if __name__ == '__main__':
     app.config['JSON_SORT_KEYS'] = False
     app.config['BASIC_AUTH_FORCE'] = True
-
-    class ChallengeAuth(BasicAuth):
-        def challenge(self):
-            return jsonify(errors('401', 'Wrong username or password')), 401
 
     basic_auth = ChallengeAuth(app)
     with open('config.yaml', 'r') as yfile:
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     try:
         context = ssl.SSLContext(getattr(ssl, secureProtocol))
     except AttributeError as e:
-        exit("Invalid secureProtocol")
+        exit('Invalid secureProtocol')
 
     context.load_cert_chain(
         yamldata['server']['certPath'],
