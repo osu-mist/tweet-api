@@ -98,17 +98,20 @@ if __name__ == '__main__':
     basic_auth = ChallengeAuth(app)
     with open('config.yaml', 'r') as yfile:
         yaml_data = yaml.load(yfile)
-    secureProtocol = yaml_data['server']['secureProtocol']
+
+    server = yaml_data['server']
+    authentication =  yaml_data['authentication']
+    secureProtocol = server['secureProtocol']
     try:
         context = ssl.SSLContext(getattr(ssl, secureProtocol))
-    except AttributeError as e:
+    except AttributeError:
         exit('Invalid secureProtocol')
 
     context.load_cert_chain(
-        yaml_data['server']['certPath'],
-        yaml_data['server']['keyPath']
+        server['certPath'],
+        server['keyPath']
         )
-    app.config['BASIC_AUTH_USERNAME'] = yaml_data['authentication']['username']
-    app.config['BASIC_AUTH_PASSWORD'] = yaml_data['authentication']['password']
+    app.config['BASIC_AUTH_USERNAME'] = authentication['username']
+    app.config['BASIC_AUTH_PASSWORD'] = authentication['password']
 
-    app.run(debug=True, port=yaml_data['server']['port'], ssl_context=context)
+    app.run(debug=True, port=server['port'], ssl_context=context)
