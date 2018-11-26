@@ -59,6 +59,50 @@ def get_tweet(jsondata, user, mood):
     return tweet_data
 
 
+@app.route('/tweets/<get_id>')
+def get_ID(get_id):
+    # Opening and reading the db file
+    with open('db.json', 'r') as jfile:
+        jsondata = json.load(jfile)
+    tweetdata = {
+        'data': [
+        ]
+    }
+    for tweets in jsondata['TweetData']:
+        if get_id == tweets['TweetID']:
+            response_data = {}
+            response_data['id'] = tweets['UserID']
+            response_data['type'] = 'tweet'
+            for user in jsondata['UserData']:
+                if tweets['UserID'] == user['UserID']:
+                    username = user['Username']
+                    userFullName = user['UserFullName']
+            time = datetime.strptime(tweets['TimeAndDate'],
+                                     '%d-%b-%y %I.%M.%S.%f %p %z')
+
+            tweetdata['data'].append(attributes(response_data,
+                                                username,
+                                                userFullName,
+                                                time,
+                                                tweets['Title'],
+                                                tweets['Mood'],
+                                                tweets['TweetMsg']))
+            return jsonify(tweetdata)
+    return jsonify(tweetdata)
+
+
+def attributes(response_data, username, userFullName, time, title, mood, tweetmsg):
+    response_data['attributes'] = {
+        'username': username,
+        'userFullName': userFullName,
+        'timeAndDate': time.isoformat(),
+        'title': title,
+        'mood': mood,
+        'tweet': tweetmsg
+    }
+    return response_data
+
+
 def errors(status, detail):
     error_base_url = 'https://developer.oregonstate.edu/documentation'
     reference_error = '/error-reference'
@@ -98,17 +142,21 @@ if __name__ == '__main__':
     basic_auth = ChallengeAuth(app)
     with open('config.yaml', 'r') as yfile:
         yaml_data = yaml.load(yfile)
-    secureProtocol = yaml_data['server']['secureProtocol']
+
+    server = yaml_data['server']
+    authentication =  yaml_data['authentication']
+
+    secureProtocol = server['secureProtocol']
     try:
         context = ssl.SSLContext(getattr(ssl, secureProtocol))
-    except AttributeError as e:
+    except AttributeError:
         exit('Invalid secureProtocol')
 
     context.load_cert_chain(
-        yaml_data['server']['certPath'],
-        yaml_data['server']['keyPath']
+        server['certPath'],
+        server['keyPath']
         )
-    app.config['BASIC_AUTH_USERNAME'] = yaml_data['authentication']['username']
-    app.config['BASIC_AUTH_PASSWORD'] = yaml_data['authentication']['password']
+    app.config['BASIC_AUTH_USERNAME'] = authentication['username']
+    app.config['BASIC_AUTH_PASSWORD'] = authentication['password']
 
-    app.run(debug=True, port=yaml_data['server']['port'], ssl_context=context)
+    app.run(debug=True, port=server['port'], ssl_context=context)
