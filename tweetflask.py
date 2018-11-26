@@ -25,7 +25,7 @@ def get():
     for user in jsondata['UserData']:
         if username.upper().lower() == user['Username'].upper().lower():
             return jsonify(get_tweet(jsondata, user, mood))
-    # if the username does not exist in DB this line will be excuted
+    # if the username does not exist in DB this line will be executed
     # to return an empty array
     return jsonify(get_tweet(jsondata, None, None))
 
@@ -44,7 +44,7 @@ def get_tweet(jsondata, user, mood):
             if not mood or mood.lower() == tweets['Mood'].lower():
                 response_data = {}
                 response_data['id'] = tweets['TweetID']
-                response_data['type'] = "tweet"
+                response_data['type'] = 'tweet'
                 time = datetime.strptime(tweets['TimeAndDate'],
                                          '%d-%b-%y %I.%M.%S.%f %p %z')
                 response_data['attributes'] = {
@@ -55,17 +55,17 @@ def get_tweet(jsondata, user, mood):
                     'mood': tweets['Mood'],
                     'tweet': tweets['TweetMsg']
                 }
-                tweetdata["data"].append(response_data)
+                tweetdata['data'].append(response_data)
     return tweetdata
 
 
 def errors(status, detail):
-    error_base_url = "https://developer.oregonstate.edu/documentation"
-    reference_error = "/error-reference"
+    error_base_url = 'https://developer.oregonstate.edu/documentation'
+    reference_error = '/error-reference'
     code = f'1{status}'
     errordictionary = {
         '400': 'Bad Request',
-        '401': 'Authentication faild',
+        '401': 'Authentication failed',
         '404': 'Page not found',
         '500': 'Unexpected Internal error'
     }
