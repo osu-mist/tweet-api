@@ -33,12 +33,12 @@ def get():
 # looks up all the tweets that belong to the username provided
 # and looks for the mood if provided
 def get_tweet(jsondata, user, mood):
-    tweetdata = {
+    tweet_data = {
         'data': [
         ]
     }
     if user is None:
-        return tweetdata
+        return tweet_data
     for tweets in jsondata['TweetData']:
         if user['UserID'] == tweets['UserID']:
             if not mood or mood.lower() == tweets['Mood'].lower():
@@ -55,21 +55,21 @@ def get_tweet(jsondata, user, mood):
                     'mood': tweets['Mood'],
                     'tweet': tweets['TweetMsg']
                 }
-                tweetdata['data'].append(response_data)
-    return tweetdata
+                tweet_data['data'].append(response_data)
+    return tweet_data
 
 
 def errors(status, detail):
     error_base_url = 'https://developer.oregonstate.edu/documentation'
     reference_error = '/error-reference'
     code = f'1{status}'
-    errordictionary = {
+    error_dictionary = {
         '400': 'Bad Request',
         '401': 'Authentication failed',
         '404': 'Page not found',
         '500': 'Unexpected Internal error'
     }
-    title = errordictionary[status]
+    title = error_dictionary[status]
     error = {
         'errors': [
         ]
@@ -97,18 +97,18 @@ if __name__ == '__main__':
 
     basic_auth = ChallengeAuth(app)
     with open('config.yaml', 'r') as yfile:
-        yamldata = yaml.load(yfile)
-    secureProtocol = yamldata['server']['secureProtocol']
+        yaml_data = yaml.load(yfile)
+    secureProtocol = yaml_data['server']['secureProtocol']
     try:
         context = ssl.SSLContext(getattr(ssl, secureProtocol))
     except AttributeError as e:
         exit('Invalid secureProtocol')
 
     context.load_cert_chain(
-        yamldata['server']['certPath'],
-        yamldata['server']['keyPath']
+        yaml_data['server']['certPath'],
+        yaml_data['server']['keyPath']
         )
-    app.config['BASIC_AUTH_USERNAME'] = yamldata['authentication']['username']
-    app.config['BASIC_AUTH_PASSWORD'] = yamldata['authentication']['password']
+    app.config['BASIC_AUTH_USERNAME'] = yaml_data['authentication']['username']
+    app.config['BASIC_AUTH_PASSWORD'] = yaml_data['authentication']['password']
 
-    app.run(debug=True, port=yamldata['server']['port'], ssl_context=context)
+    app.run(debug=True, port=yaml_data['server']['port'], ssl_context=context)
