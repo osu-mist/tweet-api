@@ -10,11 +10,16 @@ import ssl
 app = Flask(__name__)
 
 
-@app.route('/tweets')
-def get():
+def read_file():
     # Opening and reading the db file
     with open('db.json', 'r') as jfile:
         jsondata = json.load(jfile)
+    return jsondata
+
+
+@app.route('/tweets', strict_slashes=False)
+def get():
+    jsondata = read_file()
     # Parsing the username and mood from url
     username = request.args.get('username')
     mood = request.args.get('mood')
@@ -24,81 +29,62 @@ def get():
     # looking up the username in the DB
     for user in jsondata['UserData']:
         if username.upper().lower() == user['Username'].upper().lower():
-            return jsonify(get_tweet(jsondata, user, mood))
+            return jsonify(get_tweet(jsondata, user, mood, None))
     # if the username does not exist in DB this line will be executed
     # to return an empty array
-    return jsonify(get_tweet(jsondata, None, None))
-
-
-# looks up all the tweets that belong to the username provided
-# and looks for the mood if provided
-def get_tweet(jsondata, user, mood):
-    tweet_data = {
-        'data': [
-        ]
-    }
-    if user is None:
-        return tweet_data
-    for tweets in jsondata['TweetData']:
-        if user['UserID'] == tweets['UserID']:
-            if not mood or mood.lower() == tweets['Mood'].lower():
-                response_data = {}
-                response_data['id'] = tweets['TweetID']
-                response_data['type'] = 'tweet'
-                time = datetime.strptime(tweets['TimeAndDate'],
-                                         '%d-%b-%y %I.%M.%S.%f %p %z')
-                response_data['attributes'] = {
-                    'username': user['Username'],
-                    'userFullName': user['UserFullName'],
-                    'timeAndDate': time.isoformat(),
-                    'title': tweets['Title'],
-                    'mood': tweets['Mood'],
-                    'tweet': tweets['TweetMsg']
-                }
-                tweet_data['data'].append(response_data)
-    return tweet_data
+    return jsonify(get_tweet(jsondata, None, None, None))
 
 
 @app.route('/tweets/<get_id>')
 def get_ID(get_id):
     # Opening and reading the db file
-    with open('db.json', 'r') as jfile:
-        jsondata = json.load(jfile)
-    tweetdata = {
+    jsondata = read_file()
+
+    for tweets in jsondata['TweetData']:
+        if get_id == tweets['TweetID']:
+            for user in jsondata['UserData']:
+                if tweets['UserID'] == user['UserID']:
+                    return jsonify(get_tweet(jsondata, user, None, get_id))
+    return jsonify(errors('404', 'tweet does not exist')), 404
+
+
+# looks up all the tweets that belong to the username provided
+# and looks for the mood if provided
+def get_tweet(jsondata, user, mood, get_id):
+    tweet_data = {
         'data': [
         ]
     }
+
+    if user is None:
+        return tweet_data
     for tweets in jsondata['TweetData']:
-        if get_id == tweets['TweetID']:
-            response_data = {}
-            response_data['id'] = tweets['UserID']
-            response_data['type'] = 'tweet'
-            for user in jsondata['UserData']:
-                if tweets['UserID'] == user['UserID']:
-                    username = user['Username']
-                    userFullName = user['UserFullName']
-            time = datetime.strptime(tweets['TimeAndDate'],
-                                     '%d-%b-%y %I.%M.%S.%f %p %z')
-
-            tweetdata['data'].append(attributes(response_data,
-                                                username,
-                                                userFullName,
-                                                time,
-                                                tweets['Title'],
-                                                tweets['Mood'],
-                                                tweets['TweetMsg']))
-            return jsonify(tweetdata)
-    return jsonify(tweetdata)
+        if user['UserID'] == tweets['UserID']:
+            if not get_id or get_id == tweets['TweetID']:
+                if not mood or mood.lower() == tweets['Mood'].lower():
+                    response_data = {}
+                    response_data['id'] = tweets['TweetID']
+                    response_data['type'] = 'tweet'
+                    time = datetime.strptime(tweets['TimeAndDate'],
+                                             '%d-%b-%y %I.%M.%S.%f %p %z')
+                    tweet_data['data'].append(attributes(response_data,
+                                                         user['Username'],
+                                                         user['UserFullName'],
+                                                         time,
+                                                         tweets['Title'],
+                                                         tweets['Mood'],
+                                                         tweets['TweetMsg']))
+    return tweet_data
 
 
-def attributes(response_data, username, userFullName, time, title, mood, tweetmsg):
+def attributes(response_data, username, userFullName, time, title, mood, msg):
     response_data['attributes'] = {
         'username': username,
         'userFullName': userFullName,
         'timeAndDate': time.isoformat(),
         'title': title,
         'mood': mood,
-        'tweet': tweetmsg
+        'tweet': msg
     }
     return response_data
 
@@ -144,8 +130,7 @@ if __name__ == '__main__':
         yaml_data = yaml.load(yfile)
 
     server = yaml_data['server']
-    authentication =  yaml_data['authentication']
-
+    authentication = yaml_data['authentication']
     secureProtocol = server['secureProtocol']
     try:
         context = ssl.SSLContext(getattr(ssl, secureProtocol))
