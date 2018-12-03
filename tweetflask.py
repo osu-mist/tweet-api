@@ -29,62 +29,49 @@ def get():
     # looking up the username in the DB
     for user in jsondata['UserData']:
         if username.upper().lower() == user['Username'].upper().lower():
-            return jsonify(get_tweet(jsondata, user, mood, None))
+            return jsonify(get_tweet(jsondata, user, mood))
     # if the username does not exist in DB this line will be executed
     # to return an empty array
-    return jsonify(get_tweet(jsondata, None, None, None))
+    return jsonify(get_tweet(jsondata, None, None))
 
 
-@app.route('/tweets/<get_id>')
-def get_ID(get_id):
-    # Opening and reading the db file
-    jsondata = read_file()
-
-    for tweets in jsondata['TweetData']:
-        if get_id == tweets['TweetID']:
-            for user in jsondata['UserData']:
-                if tweets['UserID'] == user['UserID']:
-                    return jsonify(get_tweet(jsondata, user, None, get_id))
-    return jsonify(errors('404', 'tweet does not exist')), 404
+@app.route('/tweets/<tweet_id>')
+def get_ID(tweet_id):
+    try:
+        return jsonify(tweets[tweet_id])
+    except KeyError:
+        return jsonify(errors('404', 'tweet does not exist')), 404
 
 
 # looks up all the tweets that belong to the username provided
 # and looks for the mood if provided
-def get_tweet(jsondata, user, mood, get_id):
+def get_tweet(jsondata, user, mood):
     tweet_data = {
         'data': [
         ]
     }
-
     if user is None:
         return tweet_data
     for tweets in jsondata['TweetData']:
         if user['UserID'] == tweets['UserID']:
-            if not get_id or get_id == tweets['TweetID']:
                 if not mood or mood.lower() == tweets['Mood'].lower():
-                    response_data = {}
-                    response_data['id'] = tweets['TweetID']
-                    response_data['type'] = 'tweet'
-                    time = datetime.strptime(tweets['TimeAndDate'],
-                                             '%d-%b-%y %I.%M.%S.%f %p %z')
-                    tweet_data['data'].append(attributes(response_data,
-                                                         user['Username'],
-                                                         user['UserFullName'],
-                                                         time,
-                                                         tweets['Title'],
-                                                         tweets['Mood'],
-                                                         tweets['TweetMsg']))
+                    tweet_data['data'].append(get_attributes(user, tweets))
     return tweet_data
 
 
-def attributes(response_data, username, userFullName, time, title, mood, msg):
+def get_attributes(user, tweet_data):
+    time = datetime.strptime(tweet_data['TimeAndDate'],
+                             '%d-%b-%y %I.%M.%S.%f %p %z')
+    response_data = {}
+    response_data['id'] = tweet_data['TweetID']
+    response_data['type'] = 'tweet'
     response_data['attributes'] = {
-        'username': username,
-        'userFullName': userFullName,
+        'username': user['Username'],
+        'userFullName': user['UserFullName'],
         'timeAndDate': time.isoformat(),
-        'title': title,
-        'mood': mood,
-        'tweet': msg
+        'title': tweet_data['Title'],
+        'mood': tweet_data['Mood'],
+        'tweet': tweet_data['TweetMsg']
     }
     return response_data
 
@@ -116,12 +103,23 @@ def errors(status, detail):
     return error
 
 
+def tweets_dectionary():
+    jsondata = read_file()
+    tweets = {}
+    for tweet in jsondata["TweetData"]:
+        for user in jsondata['UserData']:
+            if tweet['UserID'] == user['UserID']:
+                tweets[tweet['TweetID']] = get_attributes(user, tweet)
+    return tweets
+
+
 class ChallengeAuth(BasicAuth):
     def challenge(self):
         return jsonify(errors('401', 'Wrong username or password')), 401
 
 
 if __name__ == '__main__':
+
     app.config['JSON_SORT_KEYS'] = False
     app.config['BASIC_AUTH_FORCE'] = True
 
@@ -143,5 +141,7 @@ if __name__ == '__main__':
         )
     app.config['BASIC_AUTH_USERNAME'] = authentication['username']
     app.config['BASIC_AUTH_PASSWORD'] = authentication['password']
+
+    tweets = tweets_dectionary()
 
     app.run(debug=True, port=server['port'], ssl_context=context)
