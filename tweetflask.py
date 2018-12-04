@@ -38,7 +38,7 @@ def get():
 @app.route('/tweets/<tweet_id>')
 def get_ID(tweet_id):
     try:
-        return jsonify(tweets[tweet_id])
+        return jsonify(tweets_dec[tweet_id])
     except KeyError:
         return jsonify(errors('404', 'tweet does not exist')), 404
 
@@ -106,7 +106,7 @@ def errors(status, detail):
 def tweets_dectionary():
     jsondata = read_file()
     tweets = {}
-    for tweet in jsondata["TweetData"]:
+    for tweet in jsondata['TweetData']:
         for user in jsondata['UserData']:
             if tweet['UserID'] == user['UserID']:
                 tweets[tweet['TweetID']] = get_attributes(user, tweet)
@@ -142,6 +142,6 @@ if __name__ == '__main__':
     app.config['BASIC_AUTH_USERNAME'] = authentication['username']
     app.config['BASIC_AUTH_PASSWORD'] = authentication['password']
 
-    tweets = tweets_dectionary()
+    tweets_dec = tweets_dectionary()
 
     app.run(debug=True, port=server['port'], ssl_context=context)
