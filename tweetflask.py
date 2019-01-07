@@ -103,7 +103,7 @@ def errors(status, detail):
     return error
 
 
-def tweets_dectionary():
+def tweets_dictionary():
     jsondata = read_file()
     tweets = {}
     for tweet in jsondata['TweetData']:
@@ -142,6 +142,6 @@ if __name__ == '__main__':
     app.config['BASIC_AUTH_USERNAME'] = authentication['username']
     app.config['BASIC_AUTH_PASSWORD'] = authentication['password']
 
-    tweets_dec = tweets_dectionary()
+    tweets_dec = tweets_dictionary()
 
     app.run(debug=True, port=server['port'], ssl_context=context)
