@@ -10,11 +10,16 @@ import ssl
 app = Flask(__name__)
 
 
-@app.route('/tweets')
-def get():
+def read_file():
     # Opening and reading the db file
     with open('db.json', 'r') as jfile:
         jsondata = json.load(jfile)
+    return jsondata
+
+
+@app.route('/tweets', strict_slashes=False)
+def get():
+    jsondata = read_file()
     # Parsing the username and mood from url
     username = request.args.get('username')
     mood = request.args.get('mood')
@@ -30,6 +35,14 @@ def get():
     return jsonify(get_tweet(jsondata, None, None))
 
 
+@app.route('/tweets/<tweet_id>')
+def get_ID(tweet_id):
+    try:
+        return jsonify(tweets_dec[tweet_id])
+    except KeyError:
+        return jsonify(errors('404', 'tweet does not exist')), 404
+
+
 # looks up all the tweets that belong to the username provided
 # and looks for the mood if provided
 def get_tweet(jsondata, user, mood):
@@ -41,22 +54,26 @@ def get_tweet(jsondata, user, mood):
         return tweet_data
     for tweets in jsondata['TweetData']:
         if user['UserID'] == tweets['UserID']:
-            if not mood or mood.lower() == tweets['Mood'].lower():
-                response_data = {}
-                response_data['id'] = tweets['TweetID']
-                response_data['type'] = 'tweet'
-                time = datetime.strptime(tweets['TimeAndDate'],
-                                         '%d-%b-%y %I.%M.%S.%f %p %z')
-                response_data['attributes'] = {
-                    'username': user['Username'],
-                    'userFullName': user['UserFullName'],
-                    'timeAndDate': time.isoformat(),
-                    'title': tweets['Title'],
-                    'mood': tweets['Mood'],
-                    'tweet': tweets['TweetMsg']
-                }
-                tweet_data['data'].append(response_data)
+                if not mood or mood.lower() == tweets['Mood'].lower():
+                    tweet_data['data'].append(get_attributes(user, tweets))
     return tweet_data
+
+
+def get_attributes(user, tweet_data):
+    time = datetime.strptime(tweet_data['TimeAndDate'],
+                             '%d-%b-%y %I.%M.%S.%f %p %z')
+    response_data = {}
+    response_data['id'] = tweet_data['TweetID']
+    response_data['type'] = 'tweet'
+    response_data['attributes'] = {
+        'username': user['Username'],
+        'userFullName': user['UserFullName'],
+        'timeAndDate': time.isoformat(),
+        'title': tweet_data['Title'],
+        'mood': tweet_data['Mood'],
+        'tweet': tweet_data['TweetMsg']
+    }
+    return response_data
 
 
 def errors(status, detail):
@@ -86,12 +103,23 @@ def errors(status, detail):
     return error
 
 
+def tweets_dictionary():
+    jsondata = read_file()
+    tweets = {}
+    for tweet in jsondata['TweetData']:
+        for user in jsondata['UserData']:
+            if tweet['UserID'] == user['UserID']:
+                tweets[tweet['TweetID']] = get_attributes(user, tweet)
+    return tweets
+
+
 class ChallengeAuth(BasicAuth):
     def challenge(self):
         return jsonify(errors('401', 'Wrong username or password')), 401
 
 
 if __name__ == '__main__':
+
     app.config['JSON_SORT_KEYS'] = False
     app.config['BASIC_AUTH_FORCE'] = True
 
@@ -100,7 +128,7 @@ if __name__ == '__main__':
         yaml_data = yaml.load(yfile)
 
     server = yaml_data['server']
-    authentication =  yaml_data['authentication']
+    authentication = yaml_data['authentication']
     secureProtocol = server['secureProtocol']
     try:
         context = ssl.SSLContext(getattr(ssl, secureProtocol))
@@ -113,5 +141,7 @@ if __name__ == '__main__':
         )
     app.config['BASIC_AUTH_USERNAME'] = authentication['username']
     app.config['BASIC_AUTH_PASSWORD'] = authentication['password']
+
+    tweets_dec = tweets_dictionary()
 
     app.run(debug=True, port=server['port'], ssl_context=context)

@@ -28,3 +28,8 @@ $ python3 tweetfask.py
 
 ### /tweets
 Returns all the tweets by the username provided, or returns all the tweets by the username and the mood if provided.
+
+## GET/{id}
+### /tweets/{id}
+Returns a tweet by the tweet ID provided.
+Returns a 404 if a tweet ID doesn't exist 
