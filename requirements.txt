@@ -4,5 +4,5 @@ Flask-BasicAuth==0.2.0
 itsdangerous==1.1.0
 Jinja2==2.10
 MarkupSafe==1.1.0
-PyYAML==3.13
+PyYAML==4.2b1
 Werkzeug==0.14.1
